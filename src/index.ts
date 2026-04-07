@@ -6,6 +6,8 @@ import { promises as fsPromises } from "fs";
 
 const server = http.createServer((req, res) => {
   const productsFilePath = path.join(__dirname, "data", "product.json");
+  const assetsPath = path.join(__dirname, "assets");
+  console.log(assetsPath);
   if (req.url === "/product") {
     fs.access(productsFilePath, (err) => {
       if (err) return;
@@ -78,6 +80,29 @@ const server = http.createServer((req, res) => {
       res.end("Add A New Product\n");
     });
     //
+  } else if (req.method === "GET" && req.url === "/assets") {
+    fs.access(assetsPath, (err) => {
+      // Check If There Is Error In Dir
+      if (err) {
+        console.log(`Error Is ${assetsPath}`);
+        return;
+      }
+
+      fs.readdir(assetsPath, "utf-8", (err, files) => {
+        if (err) return;
+
+        res.writeHead(200, { "content-type": "text/html" });
+        res.write(`<h2>FILES IS:</h2>`);
+        res.write(`<ul>`);
+        files.forEach((file) => {
+          res.write(`<li>
+                        <span>${file} <button>Delete</button></span>
+                    </li>`);
+        });
+        res.write(`</ul>`);
+        res.end();
+      });
+    });
   } else {
     res.writeHead(404, { "content-type": "text/html" });
     res.end("Error\n");
