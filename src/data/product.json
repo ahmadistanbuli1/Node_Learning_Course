@@ -1,0 +1,24 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "title": "One"
+    },
+    {
+      "id": 2,
+      "title": "Two"
+    },
+    {
+      "id": 2,
+      "title": "Two"
+    },
+    {
+      "id": 4,
+      "title": "Postin"
+    },
+    {
+      "id": 5,
+      "title": "Product By Promises"
+    }
+  ]
+}
