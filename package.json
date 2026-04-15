@@ -1,6 +1,7 @@
 {
   "type": "commonjs",
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@types/node": "^25.5.0",
     "nodemon": "^3.1.14",
     "ts-node": "^10.9.2",
@@ -10,6 +11,9 @@
   "scripts": {
     "build": "tsc -p .",
     "start": "node dist/index.js",
-    "dev": "nodemon --watch src --ext ts --exec ts-node ./src/index.ts"
+    "dev": "nodemon --watch src --ext ts --exec ts-node ./src/server.ts"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
   }
 }

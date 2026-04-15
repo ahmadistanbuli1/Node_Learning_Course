@@ -96,12 +96,31 @@ const server = http.createServer((req, res) => {
         res.write(`<ul>`);
         files.forEach((file) => {
           res.write(`<li>
-                        <span>${file} <button>Delete</button></span>
+                        <a
+                          href="/delete?file=${encodeURIComponent(file)}"
+                        >
+                          ${file}
+                        </a>
                     </li>`);
         });
         res.write(`</ul>`);
         res.end();
       });
+    });
+  } else if (req.method === "GET" && req.url?.startsWith("/delete")) {
+    const file = decodeURIComponent(req.url.split("?")[1].split("=")[1] || "");
+
+    const assetsFile = path.join(__dirname, "assets", file);
+
+    fs.unlink(assetsFile, (err) => {
+      if (err) {
+        console.log(`Error In Delete File`);
+        return;
+      }
+
+      res.writeHead(200, { "content-type": "text/html" });
+      res.write(`<h1>File ${file} Has Been Deleted</h1>`);
+      res.end();
     });
   } else {
     res.writeHead(404, { "content-type": "text/html" });
