@@ -1,28 +1,38 @@
 import express from "express";
+import { generateFakeData } from "./utils/fakeData";
+import { IProduct } from "./interfaces";
 
 const app = express();
 
-const DUMMY_PRODUCTS = [
-  {
-    id: 1,
-    name: "Ahmad",
-  },
-  {
-    id: 2,
-    name: "Ahm",
-  },
-  {
-    id: 3,
-    name: "A",
-  },
-];
+const FAKE_PRODUCTS = generateFakeData();
 
 app.get("/", (req, res) => {
-  res.send("<h1>Hello Express</h1>");
+  res.send(`<h1>Hello Express</h1>`);
 });
 
 app.get("/products", (req, res) => {
-  res.send(DUMMY_PRODUCTS);
+  // * Dealing With Query Params Example
+  const filterQuery = req.query.filter as string;
+  console.log(filterQuery);
+
+  if (filterQuery) {
+    const propertiesToFilter = filterQuery.split(",");
+    let filteredProducts = [];
+    filteredProducts = FAKE_PRODUCTS.map((product) => {
+      const filteredProduct: any = {};
+      propertiesToFilter.forEach((property) => {
+        if (property in product) {
+          filteredProduct[property as keyof IProduct] =
+            product[property as keyof IProduct];
+        }
+      });
+      return { id: product.id, ...filteredProduct };
+    });
+    res.send(filteredProducts);
+    return;
+  }
+
+  res.send(FAKE_PRODUCTS);
 });
 
 app.get(`/products/:id`, (req, res) => {
@@ -31,11 +41,11 @@ app.get(`/products/:id`, (req, res) => {
   if (isNaN(productId)) {
     res.status(404).send({ message: "Invalid Id" });
   }
-  const findProduct = DUMMY_PRODUCTS.find(
-    (product) => product.id === productId,
-  );
+  const findProduct = FAKE_PRODUCTS.find((product) => product.id === productId);
 
-  findProduct ? res.send(findProduct) : res.send("No Products By This Id");
+  findProduct
+    ? res.send(findProduct)
+    : res.status(404).send({ message: "Product not found" });
 });
 
 const PORT: number = 5000;
