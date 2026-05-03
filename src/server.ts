@@ -18,10 +18,12 @@ app.get("/", (req, res) => {
   res.send("<h1>Welcome In Main Page</h1>");
 });
 
+// Get Request
 app.get("/products", (req, res) => {
   res.send(PRODUCTS);
 });
 
+// Post Request
 app.post("/products", (req, res) => {
   const newProduct: IProduct = {
     id: PRODUCTS.length + 1,
@@ -38,15 +40,62 @@ app.post("/products", (req, res) => {
   });
 });
 
+// Patch Request
+app.patch("/products/:id", (req, res) => {
+  const idProduct: number = parseInt(req.params.id);
+
+  if (isNaN(idProduct)) {
+    res.status(404).send({ message: `Invalid ID` });
+    return;
+  }
+
+  const productIndex: number = PRODUCTS.findIndex((p) => p.id === idProduct);
+  if (productIndex === -1) {
+    res.status(404).send({ message: `Product Not Found` });
+    return;
+  }
+
+  PRODUCTS[productIndex] = {
+    ...PRODUCTS[productIndex],
+    ...req.body,
+  };
+  res.status(200).send({
+    message: "Product Updated Successfully",
+    product: PRODUCTS[productIndex],
+  });
+});
+
+// Delete Request
+app.delete("/products/:id", (req, res) => {
+  const idProduct: number = parseInt(req.params.id);
+  if (isNaN(idProduct)) {
+    res.status(404).send({ message: `Invalid ID` });
+    return;
+  }
+  const productIndex: number = PRODUCTS.findIndex((p) => p.id === idProduct);
+  if (productIndex === -1) {
+    res.status(404).send({ message: `Product Not Found` });
+    return;
+  }
+  PRODUCTS.splice(productIndex, 1);
+  // Or By Filter Method
+  // PRODUCTS = PRODUCTS.filter((p) => p.id !== idProduct);
+  // Send Response
+  res.status(200).send({ message: "Product Deleted Successfully" });
+});
+
+// Get Product By ID
 app.get("/products/:id", (req, res) => {
   const id: number = parseInt(req.params.id);
   if (isNaN(id)) {
-    res.status(404).send(`Invalid ID`);
+    res.status(404).send({ message: `Invalid ID` });
     return;
   }
 
   const product: IProduct | undefined = PRODUCTS.find((p) => p.id === id);
-  product ? res.send(product) : res.send(`Product Not Found`);
+  product
+    ? res.send(product)
+    : res.status(404).send({ message: `Product Not Found` });
 });
 
 const PORT: number = 5000;
