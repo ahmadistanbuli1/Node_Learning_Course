@@ -1,55 +1,56 @@
 import express from "express";
-import { generateFakeData } from "./utils/fakeData";
 import { IProduct } from "./interfaces";
+import { generateFakeData } from "./utils/fakeData";
 
 const app = express();
 
-const FAKE_PRODUCTS = generateFakeData();
+//It Is A Middleware, For Parsing application/json
+app.use(
+  express.json({
+    // type Refer To Content-Type In Header
+    type: "application/json",
+  }),
+);
+
+const PRODUCTS: IProduct[] = generateFakeData();
 
 app.get("/", (req, res) => {
-  res.send(`<h1>Hello Express</h1>`);
+  res.send("<h1>Welcome In Main Page</h1>");
 });
 
 app.get("/products", (req, res) => {
-  // * Dealing With Query Params Example
-  const filterQuery = req.query.filter as string;
-  console.log(filterQuery);
+  res.send(PRODUCTS);
+});
 
-  if (filterQuery) {
-    const propertiesToFilter = filterQuery.split(",");
-    let filteredProducts = [];
-    filteredProducts = FAKE_PRODUCTS.map((product) => {
-      const filteredProduct: any = {};
-      propertiesToFilter.forEach((property) => {
-        if (property in product) {
-          filteredProduct[property as keyof IProduct] =
-            product[property as keyof IProduct];
-        }
-      });
-      return { id: product.id, ...filteredProduct };
-    });
-    res.send(filteredProducts);
+app.post("/products", (req, res) => {
+  const newProduct: IProduct = {
+    id: PRODUCTS.length + 1,
+    title: req.body.title,
+    description: req.body.description,
+    price: req.body.price,
+  };
+
+  PRODUCTS.push(newProduct);
+
+  res.status(201).send({
+    message: "Product Created Successfully",
+    product: newProduct,
+  });
+});
+
+app.get("/products/:id", (req, res) => {
+  const id: number = parseInt(req.params.id);
+  if (isNaN(id)) {
+    res.status(404).send(`Invalid ID`);
     return;
   }
 
-  res.send(FAKE_PRODUCTS);
-});
-
-app.get(`/products/:id`, (req, res) => {
-  console.log(req.params);
-  const productId = +req.params.id;
-  if (isNaN(productId)) {
-    res.status(404).send({ message: "Invalid Id" });
-  }
-  const findProduct = FAKE_PRODUCTS.find((product) => product.id === productId);
-
-  findProduct
-    ? res.send(findProduct)
-    : res.status(404).send({ message: "Product not found" });
+  const product: IProduct | undefined = PRODUCTS.find((p) => p.id === id);
+  product ? res.send(product) : res.send(`Product Not Found`);
 });
 
 const PORT: number = 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server is http://localhost:${PORT}`);
+  console.log(`Server Starting with => http://localhost:${PORT}`);
 });
